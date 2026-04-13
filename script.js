@@ -1,4 +1,4 @@
-// This "Smart Link" automatically detects if you are on your laptop or on Render
+// Automatically detects if you are on localhost or Render
 const API = window.location.origin.includes("localhost") 
             ? "http://127.0.0.1:5000" 
             : window.location.origin;
@@ -39,7 +39,8 @@ function handleRegister(e) {
 
 function handleUpload(e) {
     e.preventDefault();
-    const file = document.getElementById("file").files[0];
+    const fileInput = document.getElementById("file");
+    const file = fileInput.files[0];
     if(!file) return alert("Upload file first");
 
     document.getElementById("loader").style.display = "flex";
@@ -55,6 +56,8 @@ function handleUpload(e) {
         }
 
         reportData = data;
+        
+        // Update Stats
         document.getElementById("rows").innerText = data.rows;
         document.getElementById("cols").innerText = data.cols;
         document.getElementById("errors").innerText = data.errors;
@@ -67,29 +70,40 @@ function handleUpload(e) {
 
         document.getElementById("file-meta").innerText = `Last Scan: ${file.name} | ${new Date().toLocaleTimeString()}`;
         
-        // --- FIXED INSPECTION LOG ---
+        // --- POPULATE ALL ERRORS LOG ---
         const list = document.getElementById("error-list");
-        list.innerHTML = ""; // Completely clear previous messages
+        list.innerHTML = ""; // Clear previous summary
         
         if (data.error_list && data.error_list.length > 0) {
             data.error_list.forEach(err => {
-                const d = document.createElement("div"); 
-                d.className = "error-item"; 
-                d.style.color = "white"; // Ensure text is visible
-                d.style.padding = "10px";
-                d.style.marginBottom = "5px";
-                d.style.borderLeft = "4px solid #ff4d4d";
-                d.style.background = "rgba(255, 77, 77, 0.1)";
-                d.innerText = err;
-                list.appendChild(d);
+                const item = document.createElement("div");
+                // Inline styles to guarantee visibility regardless of CSS file state
+                item.style.cssText = `
+                    color: #ff4d4d;
+                    padding: 10px 15px;
+                    background: rgba(255, 77, 77, 0.1);
+                    border-left: 4px solid #ff4d4d;
+                    margin-bottom: 8px;
+                    font-size: 14px;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                    border-radius: 0 4px 4px 0;
+                `;
+                item.innerText = "🚨 " + err;
+                list.appendChild(item);
             });
         } else {
-            list.innerHTML = '<div style="color: #4ade80; padding: 10px;">✅ No data quality issues detected!</div>';
+            list.innerHTML = `
+                <div style="color: #4ade80; padding: 20px; text-align: center; background: rgba(74, 222, 128, 0.1); border-radius: 8px;">
+                    ✅ 100% Clean Data! No errors, duplicates, or missing values found.
+                </div>`;
         }
         
         document.getElementById("dl-btn").style.display = "block";
     })
-    .catch(err => alert("Upload failed. The file might be too large or the server timed out."))
+    .catch(err => {
+        console.error(err);
+        alert("Upload failed. The file might be too large for the free server.");
+    })
     .finally(() => document.getElementById("loader").style.display = "none");
 }
 
@@ -106,7 +120,7 @@ function handleDownload(e) {
     .then(blob => {
         const a = document.createElement("a"); 
         a.href = URL.createObjectURL(blob); 
-        a.download = "DQC_Pro_Report.pdf"; 
+        a.download = "DQC_Pro_Full_Report.pdf"; 
         a.click();
     })
     .catch(() => alert("Could not generate report."));
