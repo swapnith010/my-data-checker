@@ -10,6 +10,12 @@ from reportlab.lib.pagesizes import letter
 app = Flask(__name__)
 CORS(app)
 
+# --- FOLDER SETUP ---
+# This ensures Render finds the 'uploads' folder you just created
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 # --- DATABASE SETUP ---
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -18,16 +24,12 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
-UPLOAD_FOLDER = "uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
 # --- FRONTEND SERVING ROUTES ---
-# This part makes the "Live Link" show your index.html file
+# These 2 routes are the "bridge" that makes your website visible
 @app.route('/')
 def serve_index():
     return send_from_directory('.', 'index.html')
 
-# This part helps the browser find style.css and script.js
 @app.route('/<path:path>')
 def serve_static(path):
     return send_from_directory('.', path)
@@ -84,6 +86,5 @@ def report():
 
 # --- START ENGINE ---
 if __name__ == "__main__":
-    # Render uses the 'PORT' environment variable, default to 5000 if not found
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
