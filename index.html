@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DQC Pro | AI Data Inspector</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="loader"><div class="spinner"></div></div>
+
+    <div id="auth-box" class="auth-container">
+        <div id="login-box" class="auth-card">
+            <h2 style="font-size: 2rem; margin-bottom: 10px;">DQC Pro</h2>
+            <p style="color: #94a3b8; margin-bottom: 30px;">Sign in to start inspection.</p>
+            <input id="login-username" placeholder="Username">
+            <input id="login-password" type="password" placeholder="Password">
+            <button onclick="handleLogin(event)">Enter Dashboard</button>
+            <p onclick="showRegister()" style="text-align: center; cursor: pointer; color: #3b82f6; margin-top: 20px;">New Account</p>
+        </div>
+        <div id="register-box" class="auth-card" style="display:none;">
+            <h2>Register</h2>
+            <input id="register-username" placeholder="Username">
+            <input id="register-password" type="password" placeholder="Password">
+            <button onclick="handleRegister(event)">Create Account</button>
+            <p onclick="showLogin()" style="text-align: center; cursor: pointer; color: #3b82f6; margin-top: 20px;">Back to Login</p>
+        </div>
+    </div>
+
+    <div id="main">
+        <div class="sidebar">
+            <h2 style="color: #3b82f6;">DQC PRO</h2>
+            <p style="color: #94a3b8;">Active Session</p>
+            <button onclick="location.reload()" style="background: #ef4444; margin-top: 20px;">Logout</button>
+        </div>
+
+        <div class="content">
+            <h1 id="welcome-header" style="margin-bottom: 10px;">Welcome, <span id="user-display" style="color: #3b82f6;">User</span></h1>
+            <p id="file-meta" style="color: #94a3b8; margin-bottom: 30px;">Ready for data scan.</p>
+            
+            <div class="stats-grid">
+                <div class="stat-card"><p>Rows</p><h3 id="rows">0</h3></div>
+                <div class="stat-card"><p>Cols</p><h3 id="cols">0</h3></div>
+                <div class="stat-card"><p>Errors</p><h3 id="errors">0</h3></div>
+                <div class="stat-card"><p>Quality</p><h3 id="quality">0%</h3></div>
+            </div>
+
+            <div class="upload-section">
+                <input type="file" id="file" style="margin-bottom: 20px;"><br>
+                <button onclick="handleUpload(event)" style="width: auto; padding: 15px 50px;">Start Intelligence Scan</button>
+            </div>
+
+            <div class="error-log">
+                <h3 style="margin-top: 0;">Inspection Log</h3>
+                <div id="error-list"></div>
+            </div>
+
+            <button id="dl-btn" onclick="handleDownload(event)" style="display: none; margin-top: 20px; background: #22c55e; width: auto; padding: 15px 40px;">Export PDF Intelligence Report</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
