@@ -1,24 +1,39 @@
-const API = "http://127.0.0.1:5000";
+// This "Smart Link" automatically detects if you are on your laptop or on Render
+const API = window.location.origin.includes("localhost") 
+            ? "http://127.0.0.1:5000" 
+            : window.location.origin;
+
 let reportData = null;
 
 function handleLogin(e) {
     e.preventDefault();
     const u = document.getElementById("login-username").value;
     const p = document.getElementById("login-password").value;
-    fetch(`${API}/login`, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({username: u, password: p}) })
+    
+    fetch(`${API}/login`, { 
+        method: "POST", 
+        headers: {"Content-Type": "application/json"}, 
+        body: JSON.stringify({username: u, password: p}) 
+    })
     .then(res => res.ok ? res.json() : Promise.reject())
     .then(() => {
         document.getElementById("auth-box").style.display = "none";
         document.getElementById("main").style.display = "flex";
         document.getElementById("user-display").innerText = u;
-    }).catch(() => alert("Access Denied"));
+    })
+    .catch(() => alert("Access Denied: Please Register first or check your password."));
 }
 
 function handleRegister(e) {
     e.preventDefault();
     const u = document.getElementById("register-username").value;
     const p = document.getElementById("register-password").value;
-    fetch(`${API}/register`, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({username: u, password: p}) })
+    
+    fetch(`${API}/register`, { 
+        method: "POST", 
+        headers: {"Content-Type": "application/json"}, 
+        body: JSON.stringify({username: u, password: p}) 
+    })
     .then(res => res.ok ? showLogin() : alert("Username exists"));
 }
 
@@ -39,7 +54,6 @@ function handleUpload(e) {
         document.getElementById("cols").innerText = data.cols;
         document.getElementById("errors").innerText = data.errors;
         
-        // Real-time Badge logic
         const q = data.quality;
         const qElement = document.getElementById("quality");
         qElement.innerText = q + "%";
@@ -54,16 +68,36 @@ function handleUpload(e) {
             list.appendChild(d);
         });
         document.getElementById("dl-btn").style.display = "block";
-    }).finally(() => document.getElementById("loader").style.display = "none");
+    })
+    .catch(err => alert("Upload failed. Check your connection."))
+    .finally(() => document.getElementById("loader").style.display = "none");
 }
 
 function handleDownload(e) {
     e.preventDefault();
-    fetch(`${API}/report`, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(reportData) })
-    .then(res => res.blob()).then(blob => {
-        const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "DQC_Pro_Report.pdf"; a.click();
-    });
+    if(!reportData) return alert("No data to download");
+
+    fetch(`${API}/report`, { 
+        method: "POST", 
+        headers: {"Content-Type": "application/json"}, 
+        body: JSON.stringify(reportData) 
+    })
+    .then(res => res.blob())
+    .then(blob => {
+        const a = document.createElement("a"); 
+        a.href = URL.createObjectURL(blob); 
+        a.download = "DQC_Pro_Report.pdf"; 
+        a.click();
+    })
+    .catch(() => alert("Could not generate report."));
 }
 
-function showRegister() { document.getElementById("login-box").style.display="none"; document.getElementById("register-box").style.display="block"; }
-function showLogin() { document.getElementById("login-box").style.display="block"; document.getElementById("register-box").style.display="none"; }
+function showRegister() { 
+    document.getElementById("login-box").style.display="none"; 
+    document.getElementById("register-box").style.display="block"; 
+}
+
+function showLogin() { 
+    document.getElementById("login-box").style.display="block"; 
+    document.getElementById("register-box").style.display="none"; 
+}
