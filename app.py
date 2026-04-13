@@ -11,21 +11,19 @@ app = Flask(__name__)
 CORS(app)
 
 # --- FOLDER SETUP ---
-# This ensures Render finds the 'uploads' folder you just created
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # --- DATABASE SETUP ---
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'database.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
 with app.app_context():
     db.create_all()
 
-# --- FRONTEND SERVING ROUTES ---
-# These 2 routes are the "bridge" that makes your website visible
+# --- FRONTEND ROUTES ---
 @app.route('/')
 def serve_index():
     return send_from_directory('.', 'index.html')
@@ -34,7 +32,7 @@ def serve_index():
 def serve_static(path):
     return send_from_directory('.', path)
 
-# --- BACKEND API ROUTES ---
+# --- API ROUTES ---
 @app.route('/register', methods=['POST'])
 def register():
     data = request.json
@@ -59,9 +57,13 @@ def upload():
     file = request.files['file']
     path = os.path.join(UPLOAD_FOLDER, file.filename)
     file.save(path)
-    result = analyze_file(path)
-    result['filename'] = file.filename 
-    return jsonify(result)
+    
+    try:
+        result = analyze_file(path)
+        result['filename'] = file.filename 
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/report', methods=['POST'])
 def report():
@@ -82,9 +84,8 @@ def report():
         content.append(Paragraph(f"• {err}", styles['Normal']))
     doc.build(content)
     buffer.seek(0)
-    return send_file(buffer, as_attachment=True, download_name="DQC_Pro_Report.pdf", mimetype="application/pdf")
+    return send_file(buffer, as_attachment=True, download_name="Report.pdf", mimetype="application/pdf")
 
-# --- START ENGINE ---
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
