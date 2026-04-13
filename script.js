@@ -49,7 +49,7 @@ function handleLogin(e) {
         document.getElementById("auth-box").style.display = "none";
         document.getElementById("main").style.display = "flex";
         document.getElementById("user-display").innerText = u;
-        document.body.style.background = "#0f172a"; // Match dashboard on login
+        document.body.style.background = "#0f172a"; 
     })
     .catch(() => alert("Login failed. Check credentials or register first."));
 }
@@ -57,7 +57,7 @@ function handleLogin(e) {
 function handleUpload(e) {
     e.preventDefault();
     const file = document.getElementById("file").files[0];
-    if(!file) return;
+    if(!file) return alert("Please select a file.");
 
     document.getElementById("loader").style.display = "block";
     const formData = new FormData();
@@ -77,7 +77,8 @@ function handleUpload(e) {
         data.error_list.forEach(err => {
             const d = document.createElement("div");
             d.style.color = "#ff4d4d";
-            d.style.marginBottom = "5px";
+            d.style.padding = "5px 0";
+            d.style.borderBottom = "1px solid #334155";
             d.innerText = "🚨 " + err;
             list.appendChild(d);
         });

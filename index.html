@@ -32,32 +32,37 @@
 
     <div id="main" class="container" style="display: none;">
         <header>
-            <h1>DQC PRO <span class="badge">AI-Powered</span></h1>
-            <p>User: <span id="user-display"></span> | <a href="#" onclick="location.reload()" style="color: #ff4d4d;">Logout</a></p>
+            <h1>DQC PRO <span style="color: #3b82f6;">AI-Powered</span></h1>
+            <div class="user-info">
+                User: <span id="user-display" style="color: #3b82f6; font-weight: bold;"></span> | 
+                <a href="#" onclick="location.reload()" style="color: #ef4444; text-decoration: none;">Logout</a>
+            </div>
         </header>
 
         <div class="stats-grid">
-            <div class="stat-card"><h3>Rows</h3><p id="rows">0</p></div>
-            <div class="stat-card"><h3>Cols</h3><p id="cols">0</p></div>
-            <div class="stat-card"><h3>Errors</h3><p id="errors">0</p></div>
-            <div class="stat-card"><h3>Quality</h3><p id="quality">0%</p></div>
+            <div class="stat-card"><h3>Rows Scan</h3><p id="rows">0</p></div>
+            <div class="stat-card"><h3>Columns</h3><p id="cols">0</p></div>
+            <div class="stat-card"><h3>Total Errors</h3><p id="errors">0</p></div>
+            <div class="stat-card"><h3>Data Quality</h3><p id="quality">0%</p></div>
         </div>
 
         <div class="upload-section">
             <form onsubmit="handleUpload(event)">
-                <input type="file" id="file" accept=".csv, .xlsx, .xls">
+                <input type="file" id="file" style="color: #9ca3af;">
+                <br>
                 <button type="submit" class="btn-scan">Start Intelligence Scan</button>
             </form>
-            <div id="loader" class="loader" style="display:none;">Processing...</div>
-            <p id="file-meta"></p>
+            <div id="loader" style="display:none; margin-top: 15px; color: #3b82f6;">Analyzing Dataset...</div>
         </div>
 
         <div class="log-section">
-            <h3>Inspection Log</h3>
-            <div id="error-list" class="error-log"></div>
+            <h3 style="margin-top: 0;">Inspection Log</h3>
+            <div id="error-list" class="error-log">
+                <p style="color: #4b5563;">Waiting for file upload...</p>
+            </div>
         </div>
 
-        <button id="dl-btn" class="btn-download" style="display: none;" onclick="handleDownload(event)">Download PDF Report</button>
+        <button id="dl-btn" class="btn-download" style="display: none;" onclick="handleDownload(event)">Export PDF Intelligence Report</button>
     </div>
 
     <script src="script.js"></script>
