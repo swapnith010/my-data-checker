@@ -49,11 +49,17 @@ function handleUpload(e) {
     fetch(`${API}/upload`, { method: "POST", body: formData })
     .then(res => res.json())
     .then(data => {
+        if (data.error) {
+            alert("Analysis Error: " + data.error);
+            return;
+        }
+
         reportData = data;
         document.getElementById("rows").innerText = data.rows;
         document.getElementById("cols").innerText = data.cols;
         document.getElementById("errors").innerText = data.errors;
         
+        // Update Quality Badge
         const q = data.quality;
         const qElement = document.getElementById("quality");
         qElement.innerText = q + "%";
@@ -61,15 +67,29 @@ function handleUpload(e) {
 
         document.getElementById("file-meta").innerText = `Last Scan: ${file.name} | ${new Date().toLocaleTimeString()}`;
         
+        // --- FIXED INSPECTION LOG ---
         const list = document.getElementById("error-list");
-        list.innerHTML = data.error_list.length ? "" : "No errors found.";
-        data.error_list.slice(0, 50).forEach(err => {
-            const d = document.createElement("div"); d.className="error-item"; d.innerText = err;
-            list.appendChild(d);
-        });
+        list.innerHTML = ""; // Completely clear previous messages
+        
+        if (data.error_list && data.error_list.length > 0) {
+            data.error_list.forEach(err => {
+                const d = document.createElement("div"); 
+                d.className = "error-item"; 
+                d.style.color = "white"; // Ensure text is visible
+                d.style.padding = "10px";
+                d.style.marginBottom = "5px";
+                d.style.borderLeft = "4px solid #ff4d4d";
+                d.style.background = "rgba(255, 77, 77, 0.1)";
+                d.innerText = err;
+                list.appendChild(d);
+            });
+        } else {
+            list.innerHTML = '<div style="color: #4ade80; padding: 10px;">✅ No data quality issues detected!</div>';
+        }
+        
         document.getElementById("dl-btn").style.display = "block";
     })
-    .catch(err => alert("Upload failed. Check your connection."))
+    .catch(err => alert("Upload failed. The file might be too large or the server timed out."))
     .finally(() => document.getElementById("loader").style.display = "none");
 }
 
