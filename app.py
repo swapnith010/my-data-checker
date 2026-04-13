@@ -1,5 +1,5 @@
 import io, os
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, send_from_directory
 from flask_cors import CORS
 from models import db, User
 from utils import analyze_file
@@ -10,6 +10,7 @@ from reportlab.lib.pagesizes import letter
 app = Flask(__name__)
 CORS(app)
 
+# --- DATABASE SETUP ---
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
@@ -20,6 +21,18 @@ with app.app_context():
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+# --- FRONTEND SERVING ROUTES ---
+# This part makes the "Live Link" show your index.html file
+@app.route('/')
+def serve_index():
+    return send_from_directory('.', 'index.html')
+
+# This part helps the browser find style.css and script.js
+@app.route('/<path:path>')
+def serve_static(path):
+    return send_from_directory('.', path)
+
+# --- BACKEND API ROUTES ---
 @app.route('/register', methods=['POST'])
 def register():
     data = request.json
@@ -39,11 +52,13 @@ def login():
 
 @app.route('/upload', methods=['POST'])
 def upload():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
     file = request.files['file']
     path = os.path.join(UPLOAD_FOLDER, file.filename)
     file.save(path)
     result = analyze_file(path)
-    result['filename'] = file.filename # Extra feature: return filename
+    result['filename'] = file.filename 
     return jsonify(result)
 
 @app.route('/report', methods=['POST'])
@@ -67,6 +82,8 @@ def report():
     buffer.seek(0)
     return send_file(buffer, as_attachment=True, download_name="DQC_Pro_Report.pdf", mimetype="application/pdf")
 
+# --- START ENGINE ---
 if __name__ == "__main__":
+    # Render uses the 'PORT' environment variable, default to 5000 if not found
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
